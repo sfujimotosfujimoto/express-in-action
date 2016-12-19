@@ -1,45 +1,57 @@
-const express = require('express');
-const path = require('path');
 const http = require('http');
+const path = require('path');
+const express = require('express');
 const logger = require('morgan');
+const bodyParser = require('body-parser');
 
 const app = express();
 
-const publicPath = path.resolve(__dirname, 'public');
-app.use(express.static(publicPath));
+app.set('views', path.resolve(__dirname, 'views'));
+app.set('view engine', 'ejs')
 
-app.use(logger("short"));
+const entries = [
+	{
+		title: "Another blog post",
+		body: "hey yo!",
+		published: new Date()
+	},
+	{
+		title: "Yet another blog post",
+		body: "hey yo again!",
+		published: new Date()
+	}
+];
+app.locals.entries = entries;
 
-app.get("/", function(req, res) {
-	res.end("Welcome to my Homepage!");
+app.use(logger("dev"));
+
+app.use(bodyParser.urlencoded({ extended: false }));
+
+app.get('/', function(req, res) {
+	res.render('index');
 });
 
-
-app.get("/about", function(req, res) {
-	res.end("Welcome to the about page!");
+app.get('/new-entry', function(req, res) {
+	res.render('new-entry');
 });
 
-app.get("/weather", function(req, res) {
-	res.end("The current weather is NICE!");
+app.post('/new-entry', function(req, res) {
+	if (!req.body.title || !req.body.body) {
+		res.status(400).send("Entries must have a title and a body");
+		return;
+	}
+	entries.push({
+		title: req.body.title,
+		body: req.body.body,
+		published: new Date()
+	});
+	res.redirect('/');
 });
-
-app.get("/hello/:who", function(req, res) {
-  res.end("Hello, " + req.params.who + ".");
-  res.redirect("/hello/world");
-  res.redirect("http://expressjs.com");
-});
-
-
-app.use(function(req, res) {
-	res.statusCode = 404;
-	res.end("404!");
-});
-
 
 app.use((req, res) => {
-	res.writeHead(200, {"Content-Type": "text/plain"});
-	res.end("Looks like you didn't find a static file.");
+	res.status(404).render('404');
 });
 
-http.createServer(app).listen(3000);
 
+
+http.createServer(app).listen(3000);
