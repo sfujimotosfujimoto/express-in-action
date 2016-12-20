@@ -13,6 +13,8 @@
     "body-parser": "^1.15.2",
     "ejs": "^2.5.5",
     "express": "^4.14.0",
-    "morgan": "^1.7.0"
+    "forecastio": "^0.2.0",
+    "morgan": "^1.7.0",
+    "zippity-do-dah": "0.0.2"
   }
 }
